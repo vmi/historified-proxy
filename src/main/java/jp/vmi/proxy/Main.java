@@ -26,10 +26,13 @@ public class Main implements Runnable {
     public void run() {
         Conf conf;
         log.info("Start.");
-        if (args.length > 0)
+        if (args.length > 0) {
             conf = Conf.load(new File(args[0]));
-        else
+            log.info("Load configuration from: {}", args[0]);
+        } else {
             conf = Conf.load(Conf.class.getResource("/proxy.conf"));
+            log.info("Load default configuration.");
+        }
         Historifier.initialize(conf);
         Metadata.initialize(conf);
         FilterMap filterMap = new FilterMap(conf);
