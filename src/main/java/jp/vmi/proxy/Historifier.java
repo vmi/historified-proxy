@@ -2,12 +2,10 @@ package jp.vmi.proxy;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
@@ -22,6 +20,7 @@ import jp.vmi.proxy.metadata.model.ContentInfo;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.httpclient.util.URIUtil;
+import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.FastDateFormat;
 import org.apache.xpath.XPathAPI;
@@ -34,6 +33,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.yaml.snakeyaml.Yaml;
 
 import static org.apache.xerces.impl.Constants.*;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
@@ -98,11 +98,12 @@ public class Historifier {
         // 1. get path from uri.
         // 2. add "index" if ends with "/".
         // 3. remove first "/".
-        // 4. replace "/" to "$".
+        // 4. replace "/" to "@".
         // ex) http://example.com -> index
         //     http://example.com/user/info  -> user$info
         //     http://example.com/user/info/ -> user$info$index
-        String name = URIUtil.getPath(uri).replaceFirst("/+$", "/index").replaceFirst("^/+", "").replace('/', '$');
+        URI uriObj = URI.create(uri);
+        String name = uriObj.getHost() + "@" + uriObj.getPath().replaceFirst("/+$", "/index").replaceFirst("^/+", "").replace('/', '@');
         if (mimeType.endsWith("/html")) {
             // all html files
             name = name.replaceFirst("(?:\\.\\w+)?$", ".html");
@@ -147,15 +148,11 @@ public class Historifier {
     }
 
     private void saveContentInfo(File file, ContentInfo contentInfo) {
-        File file2 = new File(file.getParent(), file.getName() + ".info");
-        try (PrintStream ps = new PrintStream(file2, "UTF-8")) {
-            ps.println("uri=" + contentInfo.getUri());
-            ps.println("contentType=" + contentInfo.getContentType());
-            ps.println("charset=" + contentInfo.getCharset());
-            ps.println("contentLength=" + contentInfo.getContentLength());
-            ps.println("checksum=" + contentInfo.getChecksum());
-            ps.println("title=" + contentInfo.getTitle());
-        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+        File file2 = new File(file.getParent(), file.getName() + ".yaml");
+        try (FileWriterWithEncoding ps = new FileWriterWithEncoding(file2, "UTF-8")) {
+            Yaml yaml = new Yaml();
+            yaml.dump(contentInfo, ps);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -182,10 +179,14 @@ public class Historifier {
             ContentInfo contentInfo = metadata.search(key);
             if (contentInfo == null) {
                 contentInfo = new ContentInfo(key, host, uri);
+                log.info("New: [{}]", uri);
             } else if (contentInfo.getContentLength() == responseInfo.contentLength
                 && StringUtils.equals(contentInfo.getChecksum(), responseInfo.checksum)) {
                 metadata.rollback();
+                log.info("Exists: [{}]", uri);
                 return;
+            } else {
+                log.info("Updated: [{}]", uri);
             }
             String path = generateSavePath(uri, responseInfo.contentType);
             File file = new File(baseDir, path);

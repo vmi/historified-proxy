@@ -32,7 +32,7 @@ public class Conf {
 
     public Storage storage;
 
-    public List<List<String>> entries;
+    public List<List<Object>> entries;
 
     public static Conf load(InputStream is) {
         try {

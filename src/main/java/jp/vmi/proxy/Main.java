@@ -1,12 +1,10 @@
 package jp.vmi.proxy;
 
 import java.io.File;
-import java.util.Map;
 
 import jp.vmi.proxy.metadata.Metadata;
 
 import org.littleshoot.proxy.DefaultHttpProxyServer;
-import org.littleshoot.proxy.HttpFilter;
 import org.littleshoot.proxy.HttpProxyServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +32,8 @@ public class Main implements Runnable {
             conf = Conf.load(Conf.class.getResource("/proxy.conf"));
         Historifier.initialize(conf);
         Metadata.initialize(conf);
-        Map<String, HttpFilter> filters = ResponseFilter.setupFilterMap(conf);
-        HttpProxyServer server = new DefaultHttpProxyServer(8080, filters);
+        FilterMap filterMap = new FilterMap(conf);
+        HttpProxyServer server = new DefaultHttpProxyServer(8080, filterMap);
         server.start(true, true);
     }
 
