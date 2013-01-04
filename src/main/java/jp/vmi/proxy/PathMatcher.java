@@ -64,7 +64,7 @@ public class PathMatcher {
             Matcher matcher = pathPattern.matcher(path);
             if (!matcher.find())
                 return null;
-            return matcher.replaceFirst(canonicalized);
+            return (canonicalized != null) ? matcher.replaceFirst(canonicalized) : path;
         } else {
             return path;
         }
