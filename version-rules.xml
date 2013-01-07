@@ -12,5 +12,10 @@
         <ignoreVersion type="regex">.*-M\d+</ignoreVersion>
       </ignoreVersions>
     </rule>
+    <rule groupId="io.netty">
+      <ignoreVersions>
+        <ignoreVersion type="regex">.*(Alpha|Beta).*</ignoreVersion>
+      </ignoreVersions>
+    </rule>
   </rules>
 </ruleset>
