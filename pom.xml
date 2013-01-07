@@ -21,6 +21,17 @@
       <id>EclipseLink</id>
       <url>http://download.eclipse.org/rt/eclipselink/maven.repo</url>
     </repository>
+    <repository>
+      <id>sonatype-nexus-snapshots</id>
+      <name>Sonatype Nexus Snapshots</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <build>
@@ -117,7 +128,7 @@
     <dependency>
       <groupId>org.littleshoot</groupId>
       <artifactId>littleproxy</artifactId>
-      <version>0.4</version>
+      <version>0.5-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <artifactId>slf4j-log4j12</artifactId>
