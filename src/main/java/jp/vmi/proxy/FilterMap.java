@@ -1,18 +1,17 @@
 package jp.vmi.proxy;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.littleshoot.proxy.HttpFilter;
+import org.littleshoot.proxy.HttpResponseFilters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FilterMap implements Map<String, HttpFilter> {
+public class FilterMap implements HttpResponseFilters {
 
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(FilterMap.class);
@@ -60,69 +59,14 @@ public class FilterMap implements Map<String, HttpFilter> {
     }
 
     @Override
-    public HttpFilter get(Object key) {
+    public HttpFilter getFilter(String hostAndPort) {
         for (Entry<Pattern, ResponseFilterFactory> entry : factories) {
             Pattern pattern = entry.getKey();
-            Matcher matcher = pattern.matcher((CharSequence) key);
+            Matcher matcher = pattern.matcher(hostAndPort);
             if (matcher.find())
-                return entry.getValue().newFilter();
+                return entry.getValue();
         }
         return null;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return factories.isEmpty();
-    }
-
-    @Override
-    public void clear() {
-        throw new UnsupportedOperationException("clear");
-    }
-
-    @Override
-    public boolean containsKey(Object key) {
-        throw new UnsupportedOperationException("containsKey");
-    }
-
-    @Override
-    public boolean containsValue(Object arg0) {
-        throw new UnsupportedOperationException("containsValue");
-    }
-
-    @Override
-    public HttpFilter put(String arg0, HttpFilter arg1) {
-        throw new UnsupportedOperationException("put");
-    }
-
-    @Override
-    public Set<java.util.Map.Entry<String, HttpFilter>> entrySet() {
-        throw new UnsupportedOperationException("entrySet");
-    }
-
-    @Override
-    public Set<String> keySet() {
-        throw new UnsupportedOperationException("keySet");
-    }
-
-    @Override
-    public void putAll(Map<? extends String, ? extends HttpFilter> arg0) {
-        throw new UnsupportedOperationException("putAll");
-    }
-
-    @Override
-    public HttpFilter remove(Object arg0) {
-        throw new UnsupportedOperationException("remove");
-    }
-
-    @Override
-    public int size() {
-        throw new UnsupportedOperationException("size");
-    }
-
-    @Override
-    public Collection<HttpFilter> values() {
-        throw new UnsupportedOperationException("values");
     }
 
 }
