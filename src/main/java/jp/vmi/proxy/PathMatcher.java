@@ -59,7 +59,7 @@ public class PathMatcher {
         return type.isInclude;
     }
 
-    public String matches(String path) {
+    public String canonicalize(String path) {
         if (pathPattern != null) {
             Matcher matcher = pathPattern.matcher(path);
             if (!matcher.find())

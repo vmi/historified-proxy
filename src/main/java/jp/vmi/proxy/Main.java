@@ -35,7 +35,7 @@ public class Main implements Runnable {
         }
         Historifier.initialize(conf);
         Metadata.initialize(conf);
-        FilterMap filterMap = new FilterMap(conf);
+        ResponseFilterFactory filterMap = new ResponseFilterFactory(conf);
         HttpProxyServer server = new DefaultHttpProxyServer(8080, filterMap);
         server.start(true, true);
     }

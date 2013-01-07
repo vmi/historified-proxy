@@ -1,85 +1,72 @@
 package jp.vmi.proxy;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.commons.httpclient.util.URIUtil;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.littleshoot.proxy.HttpFilter;
+import org.littleshoot.proxy.HttpResponseFilters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ResponseFilterFactory implements HttpFilter {
+public class ResponseFilterFactory implements HttpResponseFilters {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ResponseFilterFactory.class);
 
-    private static final int OK = HttpResponseStatus.OK.getCode();
+    private final List<Entry<Pattern, ResponseFilter>> factories = new ArrayList<>();
 
-    private final Historifier historifier = new Historifier();
-    private final List<PathMatcher> pathMatchers = new ArrayList<>();
-
-    public void addPathMatcher(PathMatcher pathMatcher) {
-        pathMatchers.add(pathMatcher);
-    }
-
-    private static class PathMatcherResult {
-
-        public final String canonPath;
-        public final boolean isInclude;
-
-        public PathMatcherResult(String canonPath, boolean isInclude) {
-            super();
-            this.canonPath = canonPath;
-            this.isInclude = isInclude;
+    public ResponseFilterFactory(Conf conf) {
+        for (List<Object> entry : conf.entries) {
+            String hostPattern = (String) entry.get(0);
+            if ("DEFAULT".equals(hostPattern))
+                hostPattern = "";
+            ResponseFilter factory = new ResponseFilter();
+            int cnt = entry.size();
+            for (int i = 1; i < cnt; i++) {
+                @SuppressWarnings("unchecked")
+                List<String> pathEntry = (List<String>) entry.get(i);
+                PathMatcher pathMatcher = new PathMatcher(pathEntry);
+                factory.addPathMatcher(pathMatcher);
+            }
+            registerFactory(hostPattern, factory);
         }
     }
 
-    private PathMatcherResult matchPath(String uri) {
-        String path = URIUtil.getFromPath(uri);
-        for (PathMatcher pathMatcher : pathMatchers) {
-            String canonPath = pathMatcher.matches(path);
-            if (canonPath != null)
-                return new PathMatcherResult(canonPath, pathMatcher.isInclude());
+    private void registerFactory(final String hostPattern, final ResponseFilter filter) {
+        Entry<Pattern, ResponseFilter> entry = new Entry<Pattern, ResponseFilter>() {
+            private final Pattern key = Pattern.compile(hostPattern);
+            private final ResponseFilter value = filter;
+
+            @Override
+            public Pattern getKey() {
+                return key;
+            }
+
+            @Override
+            public ResponseFilter getValue() {
+                return value;
+            }
+
+            @Override
+            public ResponseFilter setValue(ResponseFilter paramV) {
+                throw new UnsupportedOperationException("setValue");
+            }
+        };
+        factories.add(entry);
+    }
+
+    @Override
+    public HttpFilter getFilter(String hostAndPort) {
+        for (Entry<Pattern, ResponseFilter> entry : factories) {
+            Pattern pattern = entry.getKey();
+            Matcher matcher = pattern.matcher(hostAndPort);
+            if (matcher.find())
+                return entry.getValue();
         }
         return null;
     }
 
-    @Override
-    public boolean filterResponses(HttpRequest request) {
-        if (request.getMethod() == HttpMethod.GET) {
-            String uri = request.getUri();
-            PathMatcherResult result = matchPath(uri);
-            if (result != null) {
-                if (result.isInclude)
-                    log.info("Include: [{}]", uri);
-                else
-                    log.info("Exclude: [{}]", uri);
-                return result.isInclude;
-            }
-            log.info("Skip: {}", uri);
-        }
-        return false;
-    }
-
-    @Override
-    public HttpResponse filterResponse(HttpRequest request, HttpResponse response) {
-        HttpResponseStatus status = response.getStatus();
-        if (status.getCode() == OK) {
-            String uri = request.getUri();
-            PathMatcherResult result = matchPath(uri);
-            String host = URI.create(uri).getHost();
-            String key = host + result.canonPath;
-            historifier.storeResponse(key, host, uri, response);
-        }
-        return response;
-    }
-
-    @Override
-    public int getMaxResponseSize() {
-        return 100 * 1024 * 1024; // 100MB
-    }
 }
