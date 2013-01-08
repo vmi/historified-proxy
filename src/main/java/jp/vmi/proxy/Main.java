@@ -6,6 +6,7 @@ import jp.vmi.proxy.metadata.Metadata;
 
 import org.littleshoot.proxy.DefaultHttpProxyServer;
 import org.littleshoot.proxy.HttpProxyServer;
+import org.littleshoot.proxy.HttpResponseFilters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +36,8 @@ public class Main implements Runnable {
         }
         Historifier.initialize(conf);
         Metadata.initialize(conf);
-        ResponseFilterFactory filterMap = new ResponseFilterFactory(conf);
-        HttpProxyServer server = new DefaultHttpProxyServer(8080, filterMap);
+        HttpResponseFilters factory = new ResponseFilterFactory(conf);
+        HttpProxyServer server = new DefaultHttpProxyServer(8080, factory);
         server.start(true, true);
     }
 
