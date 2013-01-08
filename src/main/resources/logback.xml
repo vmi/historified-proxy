@@ -14,4 +14,7 @@
     <level value="ERROR" />
     <appender-ref ref="STDOUT" />
   </logger>
+  <logger name="org.littleshoot.proxy.IdleRequestHandler">
+    <level value="OFF" />
+  </logger>
 </configuration>

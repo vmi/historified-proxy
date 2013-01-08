@@ -67,13 +67,15 @@ public class ResponseFilter implements HttpFilter {
 
     @Override
     public HttpResponse filterResponse(HttpRequest request, HttpResponse response) {
+        String uri = request.getUri();
         HttpResponseStatus status = response.getStatus();
         if (status.getCode() == OK) {
-            String uri = request.getUri();
             PathMatcherResult result = matchPath(uri);
             String host = URI.create(uri).getHost();
             String key = host + result.canonPath;
             historifier.storeResponse(key, host, uri, response);
+        } else {
+            log.info("Skip: Status=[{}], URI=[{}]", status, uri);
         }
         return response;
     }
