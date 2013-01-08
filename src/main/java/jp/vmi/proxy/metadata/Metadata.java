@@ -23,6 +23,9 @@ public class Metadata implements Closeable {
 
     private static final Logger log = LoggerFactory.getLogger(Metadata.class);
 
+    // use mixed mode: http://www.h2database.com/html/features.html#auto_mixed_mode
+    private static final String H2_OPTS = ";AUTO_SERVER=TRUE";
+
     private static EntityManagerFactory emf = null;
 
     public static synchronized void initialize(Conf conf) {
@@ -33,7 +36,7 @@ public class Metadata implements Closeable {
         if (!dir.exists())
             dir.mkdirs();
         Map<String, String> props = new HashMap<>();
-        props.put("javax.persistence.jdbc.url", "jdbc:h2:" + path + "/contents-map");
+        props.put("javax.persistence.jdbc.url", "jdbc:h2:" + path + "/contents-map" + H2_OPTS);
         props.put("javax.persistence.jdbc.user", conf.storage.user);
         props.put("javax.persistence.jdbc.password", conf.storage.password);
         emf = Persistence.createEntityManagerFactory("proxy", props);
