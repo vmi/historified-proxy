@@ -30,9 +30,10 @@ public class HistoryInfo implements Serializable {
     @Index
     private String uri;
     private String contentType;
+    private String charset;
     private Long contentLength;
-    private String title;
     private String checksum;
+    private String title;
     private String path;
     private Date contentsCreated;
     private Date created;
@@ -45,6 +46,7 @@ public class HistoryInfo implements Serializable {
         this.host = contents.getHost();
         this.uri = contents.getUri();
         this.contentType = contents.getContentType();
+        this.charset = contents.getCharset();
         this.contentLength = contents.getContentLength();
         this.title = contents.getTitle();
         this.checksum = contents.getChecksum();
@@ -97,6 +99,14 @@ public class HistoryInfo implements Serializable {
         this.contentType = contentType;
     }
 
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
+    }
+
     public Long getContentLength() {
         return contentLength;
     }
@@ -105,20 +115,20 @@ public class HistoryInfo implements Serializable {
         this.contentLength = contentLength;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getChecksum() {
         return checksum;
     }
 
     public void setChecksum(String checksum) {
         this.checksum = checksum;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getPath() {
