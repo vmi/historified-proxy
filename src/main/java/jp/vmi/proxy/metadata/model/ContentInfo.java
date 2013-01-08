@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
 
 import org.eclipse.persistence.annotations.Index;
 
@@ -44,11 +43,6 @@ public class ContentInfo implements Serializable {
         this.key = key;
         this.host = host;
         this.uri = uri;
-    }
-
-    @PrePersist
-    public void prePersist() {
-        created = new Date(System.currentTimeMillis());
     }
 
     public Long getId() {
@@ -135,8 +129,8 @@ public class ContentInfo implements Serializable {
         return created;
     }
 
-    public void setCreated(Date created) {
-        this.created = created;
+    public void setCreated() {
+        this.created = new Date(System.currentTimeMillis());
     }
 
 }

@@ -61,10 +61,11 @@ public class Metadata implements Closeable {
     public void register(ContentInfo contentInfo) {
         if (!tx.isActive())
             tx.begin();
-        HistoryInfo historyInfo = new HistoryInfo(contentInfo);
         try {
+            contentInfo.setCreated();
             if (contentInfo.getId() == null)
                 em.persist(contentInfo);
+            HistoryInfo historyInfo = new HistoryInfo(contentInfo);
             em.persist(historyInfo);
             tx.commit();
         } catch (RuntimeException e) {
