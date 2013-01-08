@@ -10,7 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.yaml.snakeyaml.Yaml;
 
 public class Conf {
