@@ -9,6 +9,10 @@
   <name>historified-proxy</name>
   <url>https://github.com/vmi/historified-proxy</url>
 
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -221,7 +225,7 @@
     <dependency>
       <groupId>io.netty</groupId>
       <artifactId>netty</artifactId>
-      <version>3.5.11.Final</version>
+      <version>3.6.2.Final</version>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.nekohtml</groupId>
